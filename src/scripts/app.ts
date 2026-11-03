@@ -275,10 +275,10 @@ const enlaceProducto = (id: string) => `${location.origin}${location.pathname}#p
 /** Agrega a un mensaje de WhatsApp el enlace del producto (solo en el dominio publicado). */
 function conEnlace(href: string, id: string) {
   if (location.protocol !== 'https:') return href;
-  const u = new URL(href);
-  const t = u.searchParams.get('text') ?? '';
-  u.searchParams.set('text', `${t}\n${enlaceProducto(id)}`);
-  return u.href;
+  // Misma codificación que el resto del mensaje (%20, no «+»), y una sola vez aunque se
+  // toque «Pedir» varias veces.
+  const sufijo = encodeURIComponent(`\n${enlaceProducto(id)}`);
+  return href.endsWith(sufijo) ? href : href + sufijo;
 }
 
 function indiceFoto() {
