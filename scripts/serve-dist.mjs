@@ -1,13 +1,17 @@
-// Servidor estático mínimo para revisar dist/ tal como quedará publicado (Vercel):
+// Servidor estático mínimo para revisar dist/ tal como quedará publicado:
 // - /ruta → 308 a /ruta/ (trailingSlash)
-// - Archivos con hash (_astro, img, fonts, marca): caché inmutable de un año; HTML: sin caché.
-// - Brotli para texto.
+// - Los mismos encabezados de seguridad y caché que producción (scripts/encabezados.mjs).
+// - Brotli para texto (comprimido una vez y guardado en memoria).
 // Uso: node scripts/serve-dist.mjs [puerto]   (por defecto 5591)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
+import { REGLAS } from './encabezados.mjs';
+
+const coincide = (regla, ruta) => (regla.endsWith('/*') ? ruta.startsWith(regla.slice(0, -1)) : regla === '/*' || regla === ruta);
+const comprimidos = new Map();
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 const port = Number(process.argv[2] || process.env.PORT || 5591);
@@ -27,8 +31,6 @@ const types = {
   '.woff2': 'font/woff2',
   '.ico': 'image/x-icon',
 };
-const INMUTABLE = /^\/(_astro|img|fonts|marca)\//;
-
 http
   .createServer((req, res) => {
     const url = new URL(req.url || '/', 'http://localhost');
@@ -51,14 +53,14 @@ http
     }
     const ext = path.extname(file);
     const body = fs.readFileSync(file);
-    const headers = {
-      'Content-Type': types[ext] || 'application/octet-stream',
-      'Cache-Control': status === 200 && INMUTABLE.test(ruta) ? 'public, max-age=31536000, immutable' : 'no-cache',
-    };
+    const headers = { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-cache' };
+    for (const r of REGLAS) if (coincide(r.ruta, ruta) && (status === 200 || !r.encabezados['Cache-Control'])) Object.assign(headers, r.encabezados);
     const compressible = /\.(html|js|css|json|xml|txt|svg|webmanifest)$/.test(ext);
     if (compressible && /\bbr\b/.test(req.headers['accept-encoding'] || '')) {
+      const clave = `${file}:${fs.statSync(file).mtimeMs}`;
+      if (!comprimidos.has(clave)) comprimidos.set(clave, zlib.brotliCompressSync(body));
       res.writeHead(status, { ...headers, 'Content-Encoding': 'br' });
-      res.end(zlib.brotliCompressSync(body));
+      res.end(comprimidos.get(clave));
     } else {
       res.writeHead(status, headers);
       res.end(body);

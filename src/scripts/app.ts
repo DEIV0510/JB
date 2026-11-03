@@ -1,6 +1,7 @@
 // Comportamiento del sitio: cabecera, menú, entradas al hacer scroll, parallax, catálogo
 // (filtros, «ver más», ficha) y enlaces de WhatsApp. Sin librerías.
 // Toda capa a pantalla completa (menú, ficha) tiene su entrada en el historial: «atrás» la cierra.
+import { wa, mensajeProducto, mensajeProductoMayor } from '../lib/mensajes';
 
 const d = document;
 const html = d.documentElement;
@@ -172,8 +173,11 @@ function activarFlotante() {
 }
 
 /* ---------------- Catálogo ---------------- */
-type Foto = { a: string; s: string; u: string; w: number; h: number; bg: string };
-type Prod = { id: string; n: string; r: string | null; p: string | null; c: string; d: string | null; v: string | null; w: string; m: string; f: Foto[] };
+// Foto: [id, color de fondo, ancho, alto, [[ancho, hash avif, hash webp], …]] (ver Catalogo.astro)
+type Foto = [id: string, bg: string, w: number, h: number, v: [number, string, string][]];
+type Prod = { id: string; n: string; r: string | null; p: string | null; c: string; d: string | null; v: string | null; f: Foto[] };
+const srcset = ([id, , , , v]: Foto, fmt: 'avif' | 'webp') =>
+  v.map(([w, ha, hw]) => `/img/p/${id}-${w}.${fmt === 'avif' ? ha : hw}.${fmt} ${w}w`).join(', ');
 
 const POR_PAGINA = 12;
 const datos: Prod[] = JSON.parse($('#datos-catalogo')?.textContent || '[]');
@@ -325,22 +329,25 @@ function llenarFicha(p: Prod) {
       el.textContent = v ?? '';
     }
   }
-  $<HTMLAnchorElement>('[data-ficha-wa]', ficha)!.href = conEnlace(p.w, p.id);
-  $<HTMLAnchorElement>('[data-ficha-mayor]', ficha)!.href = conEnlace(p.m, p.id);
+  const msj = { nombre: p.n, ref: p.r, precio: p.p };
+  $<HTMLAnchorElement>('[data-ficha-wa]', ficha)!.href = conEnlace(wa(mensajeProducto(msj)), p.id);
+  $<HTMLAnchorElement>('[data-ficha-mayor]', ficha)!.href = conEnlace(wa(mensajeProductoMayor(msj)), p.id);
   fFotos.replaceChildren(
     ...p.f.map((f, i) => {
+      const [id, bg, w, h, v] = f;
       const pic = d.createElement('picture');
-      pic.style.setProperty('--bg', f.bg);
+      pic.style.setProperty('--bg', bg);
       const src = d.createElement('source');
       src.type = 'image/avif';
-      src.srcset = f.a;
+      src.srcset = srcset(f, 'avif');
       src.sizes = '(min-width: 900px) 600px, 100vw';
       const img = d.createElement('img');
-      img.srcset = f.s;
+      img.srcset = srcset(f, 'webp');
       img.sizes = src.sizes;
-      img.src = f.u;
-      img.width = f.w;
-      img.height = f.h;
+      const [wm, , hw] = v[Math.min(1, v.length - 1)];
+      img.src = `/img/p/${id}-${wm}.${hw}.webp`;
+      img.width = w;
+      img.height = h;
       img.alt = p.f.length > 1 ? `${p.n} — foto ${i + 1} de ${p.f.length}` : p.n;
       img.decoding = 'async';
       if (i > 0) img.loading = 'lazy';

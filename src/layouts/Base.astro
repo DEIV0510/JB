@@ -8,6 +8,7 @@ import Cabecera from '../components/Cabecera.astro';
 import Pie from '../components/Pie.astro';
 import WhatsAppFlotante from '../components/WhatsAppFlotante.astro';
 import { REDES, WHATSAPP } from '../lib/contacto';
+import { jsonSeguro } from '../lib/json';
 
 interface Props {
   titulo: string;
@@ -86,8 +87,8 @@ const org = {
     {ogAbs && <meta property="og:image:alt" content="JB Merch — Tu estilo. Tus reglas." />}
     <meta name="twitter:card" content="summary_large_image" />
 
-    <script type="application/ld+json" set:html={JSON.stringify(org)} />
-    {jsonld.map((j) => <script type="application/ld+json" set:html={JSON.stringify(j)} />)}
+    <script type="application/ld+json" set:html={jsonSeguro(org)} />
+    {jsonld.map((j) => <script type="application/ld+json" set:html={jsonSeguro(j)} />)}
   </head>
   <body>
     <a class="salto" href="#contenido">Saltar al contenido</a>

@@ -1,18 +1,21 @@
 ---
 // Catálogo completo (los productos del catálogo de WhatsApp Business, en su mismo orden).
 // Cada tarjeta: foto, nombre, referencia, precio y «Pedir» directo a WhatsApp con el producto
-// en el mensaje. La ficha (dialog) se arma en el cliente con los datos de #datos-catalogo.
+// en el mensaje. La ficha (dialog) se arma en el cliente con los datos de #datos-catalogo
+// (compactos: los enlaces de WhatsApp y las rutas de las fotos se rearman en app.ts).
 // Sin JS: todas las tarjetas visibles y cada «Pedir» funciona igual.
 import Foto from './Foto.astro';
 import Icono from './Icono.astro';
 import { PRODUCTOS, CATEGORIAS, foto, nombreCategoria, precioTexto } from '../lib/catalogo';
-import { wa, waDetal, waMayor, mensajeProducto, mensajeProductoMayor } from '../lib/whatsapp';
+import { wa, waDetal, waMayor, mensajeProducto } from '../lib/whatsapp';
 import { CATALOGO_WHATSAPP } from '../lib/contacto';
+import { jsonSeguro } from '../lib/json';
 
 const POR_PAGINA = 12;
 const SIZES = '(min-width: 1280px) 300px, (min-width: 1024px) 23vw, (min-width: 700px) 31vw, 47vw';
-const set = (v: [string, number, number][]) => v.map(([u, w]) => `${u} ${w}w`).join(', ');
 
+// /img/p/<foto>-<ancho>.<hash>.<formato> → solo el hash.
+const hashDe = (url: string) => url.split('.').at(-2)!;
 const datos = PRODUCTOS.map((p) => ({
   id: p.id,
   n: p.nombre,
@@ -21,12 +24,10 @@ const datos = PRODUCTOS.map((p) => ({
   c: nombreCategoria(p.categoria),
   d: p.descripcion ?? null,
   v: p.disponibilidad,
-  w: wa(mensajeProducto(p)),
-  m: wa(mensajeProductoMayor(p)),
+  // Foto: [id, color de fondo, ancho, alto, [[ancho, hash avif, hash webp], …]]
   f: p.fotos.map((id) => {
     const m = foto(id);
-    const medio = m.webp[Math.min(1, m.webp.length - 1)];
-    return { a: set(m.avif), s: set(m.webp), u: medio[0], w: m.w, h: m.h, bg: m.bg };
+    return [id, m.bg, m.w, m.h, m.avif.map(([u, w], k) => [w, hashDe(u), hashDe(m.webp[k][0])])];
   }),
 }));
 ---
@@ -153,7 +154,7 @@ const datos = PRODUCTOS.map((p) => ({
     </div>
   </dialog>
 
-  <script type="application/json" id="datos-catalogo" set:html={JSON.stringify(datos)} />
+  <script type="application/json" id="datos-catalogo" set:html={jsonSeguro(datos)} />
 </section>
 
 <style>

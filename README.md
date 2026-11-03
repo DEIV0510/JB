@@ -6,6 +6,7 @@ Sitio de una página (Astro 7, estático) con el catálogo completo de JB Merch 
 ```bash
 npm install
 npm run dev        # http://localhost:5590
+npm run build      # astro build + CSP con hashes (scripts/csp.mjs)
 npm run check      # tipos + build + verificación de enlaces, WhatsApp, redes e imágenes
 npm run preview    # sirve dist/ en http://localhost:5591
 ```
@@ -20,4 +21,4 @@ npm run preview    # sirve dist/ en http://localhost:5591
 - `_material-cliente/logos/` — logos originales del cliente.
 - `_material-cliente/catalogo-whatsapp/fotos/` — fotos del catálogo en su resolución original.
 - `scripts/` — fuentes, marca, catálogo, imágenes, OG y verificación.
-- `docs/DISENO.md` — decisiones de diseño. `docs/PENDIENTES.md` — lo que falta confirmar.
+- `docs/DISENO.md` — decisiones de diseño. `docs/SEGURIDAD.md` — protecciones, encabezados y hosting. `docs/PENDIENTES.md` — lo que falta confirmar.

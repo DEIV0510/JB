@@ -106,14 +106,20 @@ for (const p of catalogo) {
 }
 const datos = JSON.parse(index.match(/<script type="application\/json" id="datos-catalogo">(.*?)<\/script>/s)?.[1] ?? '[]');
 if (datos.length !== catalogo.length) err('index.html', `la ficha tiene ${datos.length} productos y el catálogo ${catalogo.length}`);
+// Ficha: [id, bg, ancho, alto, [[ancho, hash avif, hash webp], …]] → las rutas que arma app.ts.
 for (const p of datos) {
-  for (const f of p.f) {
-    for (const parte of [...f.a.split(','), ...f.s.split(','), f.u]) {
-      const url = parte.trim().split(/\s+/)[0];
-      if (!existe(url)) err('index.html', `ficha ${p.id}: foto inexistente ${url}`);
+  for (const [id, , , , v] of p.f) {
+    for (const [w, ha, hw] of v) {
+      for (const url of [`/img/p/${id}-${w}.${ha}.avif`, `/img/p/${id}-${w}.${hw}.webp`]) {
+        if (!existe(url)) err('index.html', `ficha ${p.id}: foto inexistente ${url}`);
+        else if ((await anchoReal(url)) !== w) err('index.html', `ficha ${p.id}: ${url} no mide ${w}`);
+      }
     }
   }
-  for (const k of ['w', 'm']) if (!p[k].startsWith(`https://wa.me/${NUMERO}?text=`)) err('index.html', `ficha ${p.id}: WhatsApp mal armado`);
+}
+// Nada en un <script> embebido puede cerrar la etiqueta.
+for (const [, cuerpo] of index.matchAll(/<script type="application\/(?:ld\+)?json"[^>]*>(.*?)<\/script>/gs)) {
+  if (cuerpo.includes('<')) err('index.html', 'JSON embebido con «<» sin escapar');
 }
 
 // Redes del brief, tal cual.

@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --port 5590",
-    "build": "astro build",
+    "build": "astro build && node scripts/csp.mjs",
     "preview": "node scripts/serve-dist.mjs",
+    "headers": "node scripts/encabezados.mjs",
     "assets": "npm run fonts && npm run brand && npm run images",
     "catalogo": "node scripts/catalogo.mjs",
     "fonts": "node scripts/fuentes.mjs",
     "brand": "node scripts/marca.mjs",
     "images": "node scripts/imagenes.mjs",
-    "check": "astro check && astro build && node scripts/verificar.mjs"
+    "check": "astro check && npm run build && node scripts/verificar.mjs"
   },
   "engines": {
     "node": ">=22.18.0"
