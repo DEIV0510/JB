@@ -1,0 +1,123 @@
+---
+// Manifiesto de marca: el lobo como protagonista, la frase en dos tiempos y el monograma.
+import marca from '../data/marca.json';
+import Logo from './Logo.astro';
+import { COPY } from '../lib/contacto';
+
+const l = marca.lobo;
+const set = l.webp.map(([u, w]) => `${u} ${w}w`).join(', ');
+const medio = l.webp.at(-1)!;
+---
+
+<section id="identidad" class="ide" aria-labelledby="ide-titulo">
+  <div class="ide__fondo" aria-hidden="true">
+    <span class="titular contorno">JB</span>
+  </div>
+  <div class="contenedor ide__grid">
+    <div class="ide__lobo" data-parallax="-0.08">
+      <img
+        src={medio[0] as string}
+        srcset={set}
+        sizes="(min-width: 1024px) 40vw, 76vw"
+        width={l.w}
+        height={l.h}
+        alt="Lobo de JB Merch"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+    <div class="ide__texto">
+      <h2 id="ide-titulo" class="titular ide__frase" data-lineas>
+        <span class="linea" style="--l:0"><span>{COPY.manifiesto[0]}</span></span>
+        <span class="linea" style="--l:1"><span class="contorno">{COPY.manifiesto[1]}</span></span>
+      </h2>
+      <div class="ide__firma" data-entra style="--i:2">
+        <Logo alto={64} />
+        <span class="filete"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ide {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(80px, 12vw, 160px);
+    background: var(--negro);
+    border-top: 1px solid var(--linea-o);
+    isolation: isolate;
+  }
+  .ide__fondo {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    pointer-events: none;
+    color: var(--negro-3);
+  }
+  .ide__fondo .titular {
+    font-size: 62vw;
+    line-height: 0.8;
+    margin-right: -6vw;
+    --trazo: 1px;
+    -webkit-text-stroke-color: var(--linea-o);
+  }
+  .ide__grid {
+    display: grid;
+    gap: 48px;
+    align-items: center;
+  }
+  .ide__lobo {
+    width: min(76vw, 420px);
+    justify-self: center;
+    will-change: transform;
+  }
+  .ide__lobo img {
+    width: 100%;
+    height: auto;
+  }
+  .ide__texto {
+    display: grid;
+    gap: 40px;
+  }
+  .ide__frase {
+    font-size: min(9.2vw, 6.4rem);
+    line-height: 0.96;
+    --trazo: 1.5px;
+  }
+  .ide__firma {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .ide__firma :global(.logo) {
+    width: auto;
+    height: 64px;
+    flex: none;
+  }
+  .ide__firma .filete {
+    flex: 1;
+    color: var(--linea-o);
+    opacity: 1;
+  }
+  @media (min-width: 1024px) {
+    .ide__grid {
+      grid-template-columns: 5fr 7fr;
+      gap: 64px;
+    }
+    .ide__lobo {
+      width: 100%;
+      max-width: 520px;
+    }
+    .ide__fondo {
+      justify-content: flex-start;
+    }
+    .ide__fondo .titular {
+      font-size: 44vw;
+      margin: 0 0 0 -4vw;
+    }
+  }
+</style>

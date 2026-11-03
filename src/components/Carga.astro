@@ -1,0 +1,116 @@
+---
+// Pantalla de carga: negro, monograma blanco que aparece de abajo arriba y una línea de
+// progreso. Breve a propósito: solo en la primera visita de la sesión, nunca con movimiento
+// reducido, ahorro de datos o red 2G/3G (lo decide el script en línea del <head>).
+// La salida la maneja el script en línea de aquí abajo, no el JS principal: no espera fotos,
+// solo a que el HTML esté listo (mínimo 0,8 s desde el primer cuadro, tope 1,6 s).
+import marca from '../data/marca.json';
+
+const m = marca.monograma;
+const src = m.webp.find(([, w]) => (w as number) >= 320)![0] as string;
+---
+
+<div id="carga" class="carga" aria-hidden="true">
+  <div class="carga__centro">
+    <img class="carga__logo" src={src} width="160" height={Math.round((160 * m.h) / m.w)} alt="" fetchpriority="high" decoding="sync" />
+    <div class="carga__barra"><span></span></div>
+  </div>
+</div>
+<script is:inline>
+  (function () {
+    var d = document.documentElement;
+    var el = document.getElementById('carga');
+    if (!d.classList.contains('con-intro')) {
+      el.remove();
+      return;
+    }
+    var t0 = 0;
+    var cerrado = false;
+    function cerrar() {
+      if (cerrado) return;
+      cerrado = true;
+      el.classList.add('is-sale');
+      setTimeout(function () {
+        d.classList.remove('con-intro');
+        el.remove();
+        document.dispatchEvent(new Event('jb:listo'));
+      }, 650);
+    }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        t0 = performance.now();
+      });
+    });
+    function listo() {
+      var pasado = t0 ? performance.now() - t0 : 0;
+      setTimeout(cerrar, Math.max(0, 800 - pasado));
+    }
+    if (document.readyState !== 'loading') listo();
+    else document.addEventListener('DOMContentLoaded', listo);
+    setTimeout(cerrar, 1600);
+  })();
+</script>
+
+<style>
+  .carga {
+    display: none;
+  }
+  :global(html.con-intro) .carga {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    background: var(--negro);
+    transition: transform 0.65s var(--ease-io);
+  }
+  :global(html.con-intro) .carga.is-sale {
+    transform: translate3d(0, -100%, 0);
+  }
+  .carga__centro {
+    display: grid;
+    justify-items: center;
+    gap: 28px;
+    transition: opacity 0.3s;
+  }
+  .is-sale .carga__centro {
+    opacity: 0;
+  }
+  /* El logo se ve desde el primer cuadro (medio revelado) y termina de aparecer subiendo. */
+  .carga__logo {
+    width: 160px;
+    height: auto;
+    animation: carga-logo 0.8s var(--ease) both;
+  }
+  @keyframes carga-logo {
+    from {
+      clip-path: inset(45% 0 0 0);
+      transform: translate3d(0, 10px, 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+      transform: none;
+    }
+  }
+  .carga__barra {
+    width: 140px;
+    height: 1px;
+    background: var(--linea-o);
+    overflow: hidden;
+  }
+  .carga__barra span {
+    display: block;
+    height: 100%;
+    background: var(--blanco);
+    transform-origin: 0 50%;
+    animation: carga-barra 1.2s var(--ease) both;
+  }
+  @keyframes carga-barra {
+    from {
+      transform: scaleX(0.04);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+</style>

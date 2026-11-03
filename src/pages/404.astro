@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import Icono from '../components/Icono.astro';
+import { waDetal } from '../lib/whatsapp';
+---
+
+<Base titulo="Página no encontrada — JB Merch" descripcion="La página que buscas no existe." noindex base="/">
+  <section id="inicio" class="nf" aria-labelledby="nf-titulo">
+    <div class="contenedor nf__cuerpo">
+      <p class="rotulo nf__rot">Error 404</p>
+      <h1 id="nf-titulo" class="titular nf__titulo">
+        Esta página <span class="contorno">no existe</span>
+      </h1>
+      <div class="nf__acciones">
+        <a class="btn btn--claro" href="/">Ir al catálogo</a>
+        <a class="btn btn--borde" href={waDetal} target="_blank" rel="noopener" data-wa="404">
+          <Icono nombre="whatsapp" tam={20} />
+          Escribir por WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    min-height: 80svh;
+    display: grid;
+    align-items: center;
+    padding-block: calc(var(--cabecera) + 48px) 64px;
+  }
+  .nf__cuerpo {
+    display: grid;
+    gap: 28px;
+    justify-items: start;
+  }
+  .nf__rot {
+    color: var(--gris-o);
+  }
+  .nf__titulo {
+    font-size: clamp(2.4rem, 10vw, 7rem);
+    --trazo: 1.5px;
+  }
+  .nf__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>

@@ -1,0 +1,153 @@
+---
+import Logo from './Logo.astro';
+import Icono from './Icono.astro';
+import { NAV } from '../lib/nav';
+import { REDES, WHATSAPP, COPY } from '../lib/contacto';
+import { waDetal } from '../lib/whatsapp';
+
+const { base = '' } = Astro.props as { base?: string };
+---
+
+<footer class="pie">
+  <div class="contenedor">
+    <div class="pie__grid">
+      <div class="pie__marca">
+        <Logo alto={92} />
+        <p class="pie__lema titular">
+          <span>Tu estilo.</span>
+          <span class="contorno">Tus reglas.</span>
+        </p>
+      </div>
+
+      <nav class="pie__col" aria-label="Secciones">
+        <p class="rotulo pie__tit">Navegación</p>
+        <ul>
+          {
+            NAV.map((n) => (
+              <li>
+                <a href={`${base}${n.href}`}>{n.texto}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="pie__col">
+        <p class="rotulo pie__tit">Redes</p>
+        <ul>
+          {
+            REDES.map((r) => (
+              <li>
+                <a href={r.url} target="_blank" rel="noopener">
+                  <Icono nombre={r.id} tam={16} />
+                  {r.nombre}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="pie__col">
+        <p class="rotulo pie__tit">Pedidos</p>
+        <ul>
+          <li>
+            <a href={waDetal} target="_blank" rel="noopener" data-wa="pie">
+              <Icono nombre="whatsapp" tam={16} />
+              <span class="cifra">{WHATSAPP.internacional}</span>
+            </a>
+          </li>
+          <li><span class="pie__nota">Ventas al detal y por mayor</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="filete pie__filete"></div>
+    <div class="pie__legal">
+      <p class="rotulo">{COPY.derechos}</p>
+      <a class="rotulo pie__arriba" href={`${base}#inicio`}>Volver arriba ↑</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .pie {
+    background: var(--negro);
+    color: var(--blanco);
+    padding-block: clamp(56px, 9vw, 112px) calc(96px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--linea-o);
+  }
+  .pie__grid {
+    display: grid;
+    gap: 40px 24px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .pie__marca {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 28px;
+    align-content: start;
+  }
+  .pie__marca :global(.logo) {
+    width: auto;
+    height: 92px;
+  }
+  .pie__lema {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+  }
+  .pie__lema span {
+    display: block;
+  }
+  .pie__col .cifra {
+    white-space: nowrap;
+  }
+  .pie__tit {
+    color: var(--gris-o);
+    margin-bottom: 16px;
+  }
+  .pie__col ul {
+    display: grid;
+    gap: 4px;
+  }
+  .pie__col a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    transition: opacity 0.2s;
+  }
+  .pie__col a:hover {
+    opacity: 0.65;
+  }
+  .pie__nota {
+    display: block;
+    color: var(--gris-o);
+    font-size: 0.9375rem;
+    padding-top: 6px;
+  }
+  .pie__filete {
+    margin-block: clamp(40px, 6vw, 72px) 20px;
+    color: var(--linea-o);
+  }
+  .pie__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    justify-content: space-between;
+    color: var(--gris-o);
+  }
+  .pie__arriba {
+    min-height: 24px;
+  }
+  .pie__arriba:hover {
+    color: var(--blanco);
+  }
+  @media (min-width: 900px) {
+    .pie__grid {
+      grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
+    }
+    .pie__marca {
+      grid-column: auto;
+    }
+  }
+</style>

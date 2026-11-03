@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Categorias from '../components/Categorias.astro';
+import Catalogo from '../components/Catalogo.astro';
+import Venta from '../components/Venta.astro';
+import Identidad from '../components/Identidad.astro';
+import Contacto from '../components/Contacto.astro';
+import { PRODUCTOS, foto, producto, nombreCategoria } from '../lib/catalogo';
+import { SELECCION, HERO_SIZES } from '../lib/seleccion';
+
+const hero = foto(producto(SELECCION.hero[0]).fotos[0]);
+const site = Astro.site;
+
+// Lista de productos con su precio en pesos (solo lo que trae el catálogo).
+const itemList = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Catálogo JB Merch',
+  numberOfItems: PRODUCTOS.length,
+  itemListElement: PRODUCTOS.map((p, i) => {
+    const f = foto(p.fotos[0]);
+    return {
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Product',
+        name: p.nombre,
+        category: nombreCategoria(p.categoria),
+        ...(p.ref ? { sku: p.ref } : {}),
+        ...(site ? { image: new URL(f.webp.at(-1)![0], site).href, url: new URL(`/#p-${p.id}`, site).href } : {}),
+        brand: { '@type': 'Brand', name: 'JB Merch' },
+        ...(p.precio ? { offers: { '@type': 'Offer', price: p.precio, priceCurrency: 'COP' } } : {}),
+      },
+    };
+  }),
+};
+---
+
+<Base
+  titulo="JB Merch — Tu estilo. Tus reglas. Ropa urbana al detal y por mayor"
+  descripcion={`Catálogo JB Merch: ${PRODUCTOS.length} productos entre camisetas, jeans, bermudas y más, con precio y referencia. Compra al detal o por mayor por WhatsApp.`}
+  intro
+  precarga={{ srcset: hero.avif.map(([u, w]) => `${u} ${w}w`).join(', '), sizes: HERO_SIZES }}
+  jsonld={[itemList]}
+>
+  <Hero />
+  <Categorias />
+  <Catalogo />
+  <Venta />
+  <Identidad />
+  <Contacto />
+</Base>

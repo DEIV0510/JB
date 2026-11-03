@@ -1,0 +1,46 @@
+---
+// <picture> con AVIF + WebP en los anchos reales de la foto (src/data/media.json).
+// `prioridad` = la foto del LCP: carga inmediata y fetchpriority alto. El resto, diferida.
+import { foto } from '../lib/catalogo';
+
+interface Props {
+  id: string;
+  alt: string;
+  sizes: string;
+  class?: string;
+  prioridad?: boolean;
+}
+const { id, alt, sizes, class: clase, prioridad = false } = Astro.props;
+const m = foto(id);
+const set = (v: typeof m.avif) => v.map(([u, w]) => `${u} ${w}w`).join(', ');
+const medio = m.webp[Math.min(1, m.webp.length - 1)];
+---
+
+<picture class:list={['foto', clase]} style={`--bg:${m.bg}`}>
+  <source type="image/avif" srcset={set(m.avif)} sizes={sizes} />
+  <img
+    src={medio[0]}
+    srcset={set(m.webp)}
+    sizes={sizes}
+    width={medio[1]}
+    height={medio[2]}
+    alt={alt}
+    loading={prioridad ? 'eager' : 'lazy'}
+    decoding={prioridad ? 'sync' : 'async'}
+    fetchpriority={prioridad ? 'high' : undefined}
+  />
+</picture>
+
+<style>
+  .foto {
+    display: block;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

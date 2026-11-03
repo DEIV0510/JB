@@ -1,0 +1,54 @@
+{
+  "monograma": {
+    "w": 662,
+    "h": 563,
+    "webp": [
+      [
+        "/marca/jb-merch-120.06082269.webp",
+        120
+      ],
+      [
+        "/marca/jb-merch-200.525d83ee.webp",
+        200
+      ],
+      [
+        "/marca/jb-merch-320.cced0cdb.webp",
+        320
+      ],
+      [
+        "/marca/jb-merch-480.93934040.webp",
+        480
+      ],
+      [
+        "/marca/jb-merch-640.e40f2d5b.webp",
+        640
+      ]
+    ],
+    "png": "/marca/jb-merch.93ccde64.png"
+  },
+  "lobo": {
+    "w": 779,
+    "h": 911,
+    "webp": [
+      [
+        "/marca/lobo-96.244f4aa6.webp",
+        96
+      ],
+      [
+        "/marca/lobo-240.6c7c3708.webp",
+        240
+      ],
+      [
+        "/marca/lobo-480.6082de03.webp",
+        480
+      ]
+    ],
+    "png": "/marca/lobo.edde301b.png"
+  },
+  "iconos": {
+    "i32": "/marca/favicon-32.0b40e4e2.png",
+    "i180": "/marca/apple-touch.566cb509.png",
+    "i192": "/marca/icon-192.d3b091e8.png",
+    "i512": "/marca/icon-512.eb52a754.png"
+  }
+}

@@ -1,0 +1,39 @@
+---
+// Monograma JB Merch (archivo del cliente, blanco con transparencia). Sin redibujar.
+import marca from '../data/marca.json';
+
+interface Props {
+  alto: number; // alto CSS en px
+  class?: string;
+  prioridad?: boolean;
+  decorativo?: boolean;
+}
+const { alto, class: clase, prioridad = false, decorativo = false } = Astro.props;
+const m = marca.monograma;
+const ancho = Math.round((alto * m.w) / m.h);
+const set = m.webp.map(([u, w]) => `${u} ${w}w`).join(', ');
+// El navegador elige por densidad: 2x del ancho en pantalla.
+const sizes = `${ancho}px`;
+const src = (m.webp.find(([, w]) => (w as number) >= ancho * 2) ?? m.webp.at(-1))![0] as string;
+---
+
+<img
+  class:list={['logo', clase]}
+  src={src}
+  srcset={set}
+  sizes={sizes}
+  width={ancho}
+  height={alto}
+  alt={decorativo ? '' : 'JB Merch'}
+  loading={prioridad ? 'eager' : 'lazy'}
+  decoding="async"
+  fetchpriority={prioridad ? 'high' : undefined}
+/>
+
+<style>
+  .logo {
+    display: block;
+    height: auto;
+    max-width: 100%;
+  }
+</style>

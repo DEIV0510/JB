@@ -1,0 +1,60 @@
+---
+// Íconos SVG en línea (trazo o relleno según el ícono). Decorativos por defecto: el texto del
+// botón o un aria-label en el enlace es lo que se lee.
+type Nombre = 'whatsapp' | 'instagram' | 'facebook' | 'tiktok' | 'flecha' | 'flecha-diag' | 'cerrar' | 'menu' | 'izq' | 'der';
+interface Props {
+  nombre: Nombre;
+  class?: string;
+  tam?: number;
+}
+const { nombre, class: clase, tam = 20 } = Astro.props;
+---
+
+<svg class:list={['icono', clase]} width={tam} height={tam} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  {
+    nombre === 'whatsapp' && (
+      <path
+        fill="currentColor"
+        d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.55-3.7 8.24-8.24 8.24Zm4.52-6.16c-.25-.12-1.47-.72-1.7-.81-.22-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.16-.48-.28Z"
+      />
+    )
+  }
+  {
+    nombre === 'instagram' && (
+      <g fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4.2" />
+        <circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none" />
+      </g>
+    )
+  }
+  {
+    nombre === 'facebook' && (
+      <path
+        fill="currentColor"
+        d="M13.5 21v-7.6h2.56l.38-2.97H13.5V8.53c0-.86.24-1.45 1.47-1.45h1.57V4.43a21 21 0 0 0-2.29-.12c-2.27 0-3.82 1.38-3.82 3.93v2.19H7.87v2.97h2.56V21h3.07Z"
+      />
+    )
+  }
+  {
+    nombre === 'tiktok' && (
+      <path
+        fill="currentColor"
+        d="M16.6 3h-3.04v12.1a2.62 2.62 0 1 1-2.62-2.62c.27 0 .53.04.78.12V9.5a5.7 5.7 0 1 0 4.88 5.64V9.03a7.4 7.4 0 0 0 4.3 1.38V7.37A4.31 4.31 0 0 1 16.6 3Z"
+      />
+    )
+  }
+  {nombre === 'flecha' && <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" d="M4 12h15m-6-6 6 6-6 6" />}
+  {nombre === 'flecha-diag' && <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" d="M7 17 17 7M9 7h8v8" />}
+  {nombre === 'cerrar' && <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" d="m5 5 14 14M19 5 5 19" />}
+  {nombre === 'menu' && <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" d="M3 8h18M3 16h18" />}
+  {nombre === 'izq' && <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" d="m15 5-7 7 7 7" />}
+  {nombre === 'der' && <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" d="m9 5 7 7-7 7" />}
+</svg>
+
+<style>
+  .icono {
+    display: block;
+    flex: none;
+  }
+</style>

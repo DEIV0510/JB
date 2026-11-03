@@ -1,0 +1,113 @@
+---
+// Detal y por mayor: dos bloques distintos, cada uno con su mensaje de WhatsApp.
+import Icono from './Icono.astro';
+import { waDetal, waMayor } from '../lib/whatsapp';
+---
+
+<section id="mayor" class="venta" aria-labelledby="venta-titulo">
+  <div class="contenedor">
+    <h2 id="venta-titulo" class="sr">Compra al detal y al por mayor</h2>
+    <div class="venta__grid">
+      <article class="venta__bloque venta__bloque--detal" data-entra>
+        <p class="venta__num rotulo cifra">01</p>
+        <h3 class="titular venta__titulo">
+          <span class="venta__sub">Compra</span>
+          al detal
+        </h3>
+        <p class="venta__txt">Encuentra tus productos favoritos y compra de manera sencilla.</p>
+        <a class="btn btn--oscuro venta__btn" href={waDetal} target="_blank" rel="noopener" data-wa="detal">
+          <Icono nombre="whatsapp" tam={20} />
+          Comprar ahora
+        </a>
+      </article>
+
+      <article class="venta__bloque venta__bloque--mayor" data-entra style="--i:1">
+        <p class="venta__num rotulo cifra">02</p>
+        <h3 class="titular venta__titulo">
+          <span class="venta__sub">Compra</span>
+          <span class="contorno">al por mayor</span>
+        </h3>
+        <p class="venta__txt">¿Buscas comprar en cantidades o distribuir nuestros productos? Contáctanos para conocer las opciones comerciales.</p>
+        <a class="btn btn--claro venta__btn" href={waMayor} target="_blank" rel="noopener" data-wa="mayor">
+          <Icono nombre="whatsapp" tam={20} />
+          Cotizar por WhatsApp
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .venta {
+    background: var(--blanco);
+    color: var(--negro);
+    padding-block: 0 clamp(72px, 11vw, 140px);
+    color-scheme: light;
+  }
+  .venta__grid {
+    display: grid;
+    gap: 12px;
+  }
+  .venta__bloque {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 18px;
+    padding: clamp(28px, 5vw, 56px) clamp(22px, 4vw, 48px);
+  }
+  .venta__bloque--detal {
+    border: 1.5px solid var(--negro);
+  }
+  .venta__bloque--mayor {
+    background: var(--negro);
+    color: var(--blanco);
+    /* Filete doble por dentro: el trazo del monograma. */
+    outline: 4px double var(--blanco);
+    outline-offset: -12px;
+    --trazo: 1.5px;
+  }
+  .venta__num {
+    font-size: 0.6875rem;
+    opacity: 0.6;
+  }
+  .venta__titulo {
+    font-size: clamp(2.2rem, 9.6vw, 5.4rem);
+    line-height: 0.94;
+  }
+  .venta__sub {
+    display: block;
+    font-family: var(--font-text);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    margin-bottom: 0.9em;
+  }
+  .venta__txt {
+    max-width: 36ch;
+    font-size: 1.0625rem;
+    opacity: 0.82;
+  }
+  .venta__btn {
+    justify-self: start;
+    margin-top: 10px;
+  }
+  @media (max-width: 559.98px) {
+    .venta__btn {
+      justify-self: stretch;
+    }
+  }
+  @media (min-width: 900px) {
+    .venta__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .venta__bloque {
+      min-height: 480px;
+      align-content: space-between;
+    }
+    .venta__bloque--mayor {
+      margin-top: 72px;
+    }
+  }
+</style>

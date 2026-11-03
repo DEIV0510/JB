@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.astro/
+.cache/
+.vercel/
+*.log
+.DS_Store
+Thumbs.db
+qa-capturas/
+
+# Volcado crudo del catálogo de WhatsApp (76 MB, fotos en base64): las fotos ya están
+# extraídas en _material-cliente/catalogo-whatsapp/fotos/. Se conserva solo en local.
+_material-cliente/catalogo-whatsapp/catalogo-whatsapp.json

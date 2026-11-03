@@ -1,0 +1,166 @@
+---
+import Icono from './Icono.astro';
+import { REDES, WHATSAPP, COPY } from '../lib/contacto';
+import { waDetal, waMayor } from '../lib/whatsapp';
+---
+
+<section id="contacto" class="con" aria-labelledby="con-titulo" data-contacto>
+  <div class="contenedor">
+    <h2 id="con-titulo" class="titular con__titulo" data-lineas>
+      <span class="linea" style="--l:0"><span>¿Listo para</span></span>
+      <span class="linea" style="--l:1"><span>hacer tu</span></span>
+      <span class="linea" style="--l:2"><span class="contorno">pedido?</span></span>
+    </h2>
+
+    <div class="con__grid">
+      <div class="con__wa" data-entra>
+        <p class="rotulo con__rot">WhatsApp</p>
+        <a class="con__numero titular cifra" href={waDetal} target="_blank" rel="noopener" data-wa="contacto-numero">
+          {WHATSAPP.visible}
+        </a>
+        <div class="con__btns">
+          <a class="btn btn--oscuro" href={waDetal} target="_blank" rel="noopener" data-wa="contacto">
+            <Icono nombre="whatsapp" tam={20} />
+            Escribir ahora
+          </a>
+          <a class="btn btn--borde-oscuro" href={waMayor} target="_blank" rel="noopener" data-wa="contacto-mayor">
+            Cotizar por mayor
+          </a>
+        </div>
+      </div>
+
+      <div class="con__redes" data-entra style="--i:1">
+        <p class="con__invita">{COPY.redes}</p>
+        <ul>
+          {
+            REDES.map((r) => (
+              <li>
+                <a class="red" href={r.url} target="_blank" rel="noopener">
+                  <Icono nombre={r.id} tam={24} />
+                  <span class="red__nombre">{r.nombre}</span>
+                  <span class="red__usuario">{r.usuario}</span>
+                  <Icono nombre="flecha-diag" tam={18} class="red__flecha" />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .con {
+    background: var(--blanco);
+    color: var(--negro);
+    padding-block: clamp(80px, 12vw, 160px);
+    color-scheme: light;
+  }
+  .con__titulo {
+    font-size: min(10.6vw, 8.8rem);
+    --trazo: 1.5px;
+  }
+  .con__grid {
+    display: grid;
+    gap: 56px;
+    margin-top: clamp(40px, 6vw, 80px);
+  }
+  .con__rot {
+    color: var(--gris-c);
+    margin-bottom: 8px;
+  }
+  .con__numero {
+    display: inline-block;
+    font-size: clamp(2rem, 8.4vw, 4.4rem);
+    line-height: 1;
+    border-bottom: 3px solid currentColor;
+    padding-bottom: 6px;
+  }
+  .con__btns {
+    display: grid;
+    gap: 10px;
+    margin-top: 32px;
+  }
+  .con__invita {
+    color: var(--gris-c);
+    max-width: 38ch;
+    margin-bottom: 20px;
+  }
+  .con__redes ul {
+    border-top: 1px solid var(--negro);
+  }
+  .red {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 4px 16px;
+    padding: 20px 4px;
+    border-bottom: 1px solid var(--negro);
+    isolation: isolate;
+    transition: color 0.3s var(--ease);
+  }
+  .red::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--negro);
+    transform: scaleY(0);
+    transform-origin: 50% 100%;
+    transition: transform 0.4s var(--ease);
+  }
+  .red__nombre {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.375rem;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .red__usuario {
+    grid-column: 2;
+    grid-row: 2;
+    color: var(--gris-c);
+    font-size: 0.875rem;
+    transition: color 0.3s;
+  }
+  :global(.red__flecha) {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    transition: transform 0.35s var(--ease);
+  }
+  @media (hover: hover) {
+    .red:hover {
+      color: var(--blanco);
+      padding-inline: 16px;
+    }
+    .red:hover::before {
+      transform: scaleY(1);
+    }
+    .red:hover .red__usuario {
+      color: var(--gris-o);
+    }
+    .red:hover :global(.red__flecha) {
+      transform: translate(3px, -3px);
+    }
+  }
+  .red {
+    transition:
+      color 0.3s var(--ease),
+      padding 0.4s var(--ease);
+  }
+  @media (min-width: 600px) {
+    .con__btns {
+      grid-template-columns: auto auto;
+      justify-content: start;
+    }
+  }
+  @media (min-width: 1024px) {
+    .con__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: end;
+    }
+  }
+</style>

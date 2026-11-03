@@ -1,0 +1,36 @@
+/* Generado por scripts/fuentes.mjs — no editar a mano. */
+@font-face {
+  font-family: 'Archivo';
+  src: url('/fonts/archivo.f49c61dd.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter.ecff9fab.woff2') format('woff2');
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Archivo Fallback";
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Arial');
+  font-weight: 800;
+  ascent-override: 80.92%;
+  descent-override: 19.35%;
+  line-gap-override: 0%;
+  size-adjust: 108.50%;
+}
+@font-face {
+  font-family: "Inter Fallback";
+  src: local('Arial'), local('ArialMT');
+  ascent-override: 90.4365%;
+  descent-override: 22.518%;
+  line-gap-override: 0%;
+  size-adjust: 107.1194%;
+}
+:root {
+  --font-display: Archivo, "Archivo Fallback", Arial, system-ui, sans-serif;
+  --font-text: Inter, "Inter Fallback", Arial, system-ui, sans-serif;
+}

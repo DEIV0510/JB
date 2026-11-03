@@ -1,0 +1,58 @@
+---
+import Icono from './Icono.astro';
+import { waDetal } from '../lib/whatsapp';
+---
+
+<a class="flota" href={waDetal} target="_blank" rel="noopener" data-wa="flotante" aria-label="Pedir por WhatsApp" data-flotante>
+  <Icono nombre="whatsapp" tam={28} />
+  <span class="flota__txt" aria-hidden="true">Pedir</span>
+</a>
+
+<style>
+  .flota {
+    position: fixed;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    z-index: 35;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 58px;
+    min-width: 58px;
+    padding: 0 15px;
+    background: var(--blanco);
+    color: var(--negro);
+    border: 1.5px solid var(--negro);
+    box-shadow:
+      0 0 0 1px var(--blanco),
+      0 10px 30px rgb(0 0 0 / 0.35);
+    transition:
+      transform 0.45s var(--ease),
+      opacity 0.3s,
+      gap 0.35s var(--ease);
+  }
+  .flota__txt {
+    max-width: 0;
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: max-width 0.4s var(--ease);
+  }
+  @media (hover: hover) {
+    .flota:hover {
+      gap: 10px;
+    }
+    .flota:hover .flota__txt {
+      max-width: 80px;
+    }
+  }
+  /* Se aparta cuando la sección de contacto o una ficha ya muestran WhatsApp. */
+  .flota.is-fuera {
+    transform: translate3d(0, 140%, 0);
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>

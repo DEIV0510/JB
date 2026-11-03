@@ -1,0 +1,679 @@
+---
+// Catálogo completo (los productos del catálogo de WhatsApp Business, en su mismo orden).
+// Cada tarjeta: foto, nombre, referencia, precio y «Pedir» directo a WhatsApp con el producto
+// en el mensaje. La ficha (dialog) se arma en el cliente con los datos de #datos-catalogo.
+// Sin JS: todas las tarjetas visibles y cada «Pedir» funciona igual.
+import Foto from './Foto.astro';
+import Icono from './Icono.astro';
+import { PRODUCTOS, CATEGORIAS, foto, nombreCategoria, precioTexto } from '../lib/catalogo';
+import { wa, waDetal, waMayor, mensajeProducto, mensajeProductoMayor } from '../lib/whatsapp';
+import { CATALOGO_WHATSAPP } from '../lib/contacto';
+
+const POR_PAGINA = 12;
+const SIZES = '(min-width: 1280px) 300px, (min-width: 1024px) 23vw, (min-width: 700px) 31vw, 47vw';
+const set = (v: [string, number, number][]) => v.map(([u, w]) => `${u} ${w}w`).join(', ');
+
+const datos = PRODUCTOS.map((p) => ({
+  id: p.id,
+  n: p.nombre,
+  r: p.ref,
+  p: p.precio ? precioTexto(p.precio) : null,
+  c: nombreCategoria(p.categoria),
+  d: p.descripcion ?? null,
+  v: p.disponibilidad,
+  w: wa(mensajeProducto(p)),
+  m: wa(mensajeProductoMayor(p)),
+  f: p.fotos.map((id) => {
+    const m = foto(id);
+    const medio = m.webp[Math.min(1, m.webp.length - 1)];
+    return { a: set(m.avif), s: set(m.webp), u: medio[0], w: m.w, h: m.h, bg: m.bg };
+  }),
+}));
+---
+
+<section id="catalogo" class="cat" aria-labelledby="cat-titulo">
+  <div class="contenedor">
+    <header class="cat__cab">
+      <h2 id="cat-titulo" class="titular cat__titulo" data-lineas>
+        <span class="linea"><span>Catálogo</span></span>
+      </h2>
+      <div class="cat__lado" data-entra>
+        <p class="cat__meta">
+          <span class="cifra" data-total>{PRODUCTOS.length}</span> productos con precio y referencia. Toca uno para ver sus fotos y pedirlo por WhatsApp.
+        </p>
+        <a class="cat__wa rotulo" href={CATALOGO_WHATSAPP} target="_blank" rel="noopener">
+          Abrir catálogo en WhatsApp <Icono nombre="flecha-diag" tam={14} />
+        </a>
+      </div>
+    </header>
+
+    <div class="filtros" data-filtros>
+      <button class="filtros__flecha filtros__flecha--izq" type="button" aria-label="Ver categorías anteriores" data-filtros-izq hidden>
+        <Icono nombre="izq" tam={18} />
+      </button>
+      <div class="filtros__fila" data-filtros-fila role="group" aria-label="Filtrar por categoría">
+        <button type="button" class="filtro" data-filtro="todo" aria-pressed="true">
+          Todo <span class="cifra">{PRODUCTOS.length}</span>
+        </button>
+        {
+          CATEGORIAS.map((c) => (
+            <button type="button" class="filtro" data-filtro={c.id} aria-pressed="false">
+              {c.nombre} <span class="cifra">{c.total}</span>
+            </button>
+          ))
+        }
+      </div>
+      <button class="filtros__flecha filtros__flecha--der" type="button" aria-label="Ver más categorías" data-filtros-der hidden>
+        <Icono nombre="der" tam={18} />
+      </button>
+    </div>
+
+    <ul class="grilla" data-grilla>
+      {
+        PRODUCTOS.map((p, i) => (
+          <li class:list={['tarjeta', { 'is-extra': i >= POR_PAGINA }]} data-cat={p.categoria} data-id={p.id} id={`p-${p.id}`}>
+            {/* Misma acción que el nombre: el lector de pantalla y el teclado usan solo ese enlace. */}
+            <a class="tarjeta__foto" href={`#p-${p.id}`} data-abrir={p.id} tabindex="-1" aria-hidden="true">
+              <Foto id={p.fotos[0]} alt={p.nombre} sizes={SIZES} class="tarjeta__img" />
+              {p.fotos[1] && <Foto id={p.fotos[1]} alt="" sizes={SIZES} class="tarjeta__img tarjeta__img--2" />}
+              {p.fotos.length > 1 && <span class="tarjeta__n rotulo cifra">{p.fotos.length} fotos</span>}
+            </a>
+            <div class="tarjeta__info">
+              <h3 class="tarjeta__nombre">
+                <a href={`#p-${p.id}`} data-abrir={p.id}>
+                  <span>{p.nombre}</span>
+                </a>
+              </h3>
+              <p class="tarjeta__datos">
+                {p.ref && <span class="tarjeta__ref rotulo cifra">Ref. {p.ref}</span>}
+                {p.precio && <span class="tarjeta__precio cifra">{precioTexto(p.precio)}</span>}
+              </p>
+              {p.disponibilidad && <p class="tarjeta__nota">{p.disponibilidad}</p>}
+            </div>
+            <a class="tarjeta__pedir" href={wa(mensajeProducto(p))} target="_blank" rel="noopener" data-wa="producto" data-producto={p.id}>
+              <Icono nombre="whatsapp" tam={18} />
+              <span>Pedir</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="cat__vacio" data-vacio hidden>No hay productos en esta categoría.</p>
+
+    <div class="cat__mas" data-mas-caja>
+      <button class="btn btn--borde-oscuro" type="button" data-mas>
+        Ver más productos <span class="cifra" data-restan></span>
+      </button>
+    </div>
+  </div>
+
+  <dialog class="ficha" aria-labelledby="ficha-nombre" data-ficha>
+    <div class="ficha__caja">
+      <button class="ficha__cerrar" type="button" data-ficha-cerrar>
+        <Icono nombre="cerrar" tam={22} />
+        <span class="sr">Cerrar</span>
+      </button>
+      <div class="ficha__galeria">
+        <div class="ficha__fotos" data-ficha-fotos tabindex="-1"></div>
+        <button class="ficha__nav ficha__nav--izq" type="button" aria-label="Foto anterior" data-ficha-ant>
+          <Icono nombre="izq" tam={20} />
+        </button>
+        <button class="ficha__nav ficha__nav--der" type="button" aria-label="Foto siguiente" data-ficha-sig>
+          <Icono nombre="der" tam={20} />
+        </button>
+        <p class="ficha__contador rotulo cifra" data-ficha-contador aria-live="polite"></p>
+      </div>
+      <div class="ficha__info">
+        <p class="rotulo ficha__cat" data-ficha-cat></p>
+        <h3 id="ficha-nombre" class="titular ficha__nombre" data-ficha-nombre></h3>
+        <dl class="ficha__datos">
+          <div data-ficha-ref-caja>
+            <dt class="rotulo">Referencia</dt>
+            <dd class="cifra" data-ficha-ref></dd>
+          </div>
+          <div data-ficha-precio-caja>
+            <dt class="rotulo">Precio</dt>
+            <dd class="cifra" data-ficha-precio></dd>
+          </div>
+        </dl>
+        <p class="ficha__disp" data-ficha-disp hidden></p>
+        <p class="ficha__desc" data-ficha-desc hidden></p>
+        <p class="ficha__nota">Escríbenos y te confirmamos tallas y disponibilidad.</p>
+        <div class="ficha__acciones">
+          <a class="btn btn--oscuro" href={waDetal} target="_blank" rel="noopener" data-ficha-wa data-wa="ficha">
+            <Icono nombre="whatsapp" tam={20} />
+            Comprar por WhatsApp
+          </a>
+          <a class="btn btn--borde-oscuro" href={waMayor} target="_blank" rel="noopener" data-ficha-mayor data-wa="ficha-mayor">
+            Cotizar al por mayor
+          </a>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="application/json" id="datos-catalogo" set:html={JSON.stringify(datos)} />
+</section>
+
+<style>
+  .cat {
+    --fondo: var(--blanco);
+    background: var(--fondo);
+    color: var(--negro);
+    padding-block: clamp(64px, 10vw, 128px) clamp(64px, 9vw, 112px);
+    color-scheme: light;
+  }
+  .cat__cab {
+    display: grid;
+    gap: 20px;
+    margin-bottom: clamp(28px, 4vw, 48px);
+  }
+  .cat__titulo {
+    font-size: min(13vw, 11rem);
+  }
+  .cat__lado {
+    display: grid;
+    gap: 14px;
+    align-content: end;
+  }
+  .cat__meta {
+    max-width: 34ch;
+    color: var(--gris-c);
+  }
+  .cat__meta .cifra {
+    color: var(--negro);
+    font-weight: 600;
+  }
+  .cat__wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    justify-self: start;
+    padding-block: 10px;
+    border-bottom: 1px solid currentColor;
+  }
+  .cat__wa {
+    white-space: nowrap;
+  }
+  @media (min-width: 900px) {
+    .cat__cab {
+      grid-template-columns: 1fr minmax(260px, 320px);
+      align-items: end;
+      gap: 40px;
+    }
+    .cat__titulo {
+      font-size: clamp(4rem, 8.6vw, 9.6rem);
+    }
+    .cat__lado {
+      justify-items: end;
+      text-align: right;
+      padding-bottom: 0.6em;
+    }
+    .cat__wa {
+      justify-self: end;
+    }
+  }
+
+  /* ---------- Filtros ---------- */
+  .filtros {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: stretch;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    background: var(--fondo);
+    border-block: 1px solid var(--negro);
+    transition: top 0.45s var(--ease);
+  }
+  :global(.cab:not(.is-oculta) ~ main) .filtros {
+    top: var(--cabecera);
+  }
+  .filtros__fila {
+    flex: 1;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+  }
+  .filtros__fila::-webkit-scrollbar {
+    display: none;
+  }
+  .filtro {
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    min-height: 52px;
+    padding: 16px 16px 14px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gris-c);
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .filtro:first-child {
+    padding-left: 0;
+  }
+  .filtro span {
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+  }
+  .filtro::after {
+    content: '';
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: -1px;
+    height: 3px;
+    background: var(--negro);
+    transform: scaleX(0);
+    transition: transform 0.35s var(--ease);
+  }
+  .filtro:first-child::after {
+    left: 0;
+  }
+  .filtro:hover {
+    color: var(--negro);
+  }
+  .filtro[aria-pressed='true'] {
+    color: var(--negro);
+  }
+  .filtro[aria-pressed='true']::after {
+    transform: scaleX(1);
+  }
+  .filtros__flecha {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    background: var(--fondo);
+    position: relative;
+    z-index: 1;
+  }
+  .filtros__flecha--izq {
+    margin-left: -12px;
+    box-shadow: 14px 0 14px -6px var(--fondo);
+  }
+  .filtros__flecha--der {
+    margin-right: -12px;
+    box-shadow: -14px 0 14px -6px var(--fondo);
+  }
+
+  /* ---------- Grilla ---------- */
+  .grilla {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 10px;
+    margin-top: 24px;
+  }
+  @media (min-width: 700px) {
+    .grilla {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 40px 16px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .grilla {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 48px 20px;
+      margin-top: 36px;
+    }
+  }
+  :global(html.js) .tarjeta.is-extra,
+  :global(html.js) .tarjeta.is-filtrada {
+    display: none;
+  }
+  .tarjeta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    scroll-margin-top: calc(var(--cabecera) + 70px);
+  }
+  .tarjeta.is-nueva {
+    animation: tarjeta-entra 0.7s var(--ease) both;
+    animation-delay: calc(var(--k, 0) * 45ms);
+  }
+  @keyframes tarjeta-entra {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tarjeta.is-nueva {
+      animation: none;
+    }
+  }
+  .tarjeta__foto {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--blanco-2);
+  }
+  .tarjeta__foto :global(.tarjeta__img) {
+    position: absolute;
+    inset: 0;
+    transition:
+      transform 0.9s var(--ease),
+      opacity 0.6s var(--ease);
+  }
+  .tarjeta__foto :global(.tarjeta__img--2) {
+    opacity: 0;
+  }
+  @media (hover: hover) {
+    .tarjeta:hover .tarjeta__foto :global(.tarjeta__img) {
+      transform: scale(1.045);
+    }
+    .tarjeta:hover .tarjeta__foto :global(.tarjeta__img--2) {
+      opacity: 1;
+    }
+  }
+  .tarjeta__n {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    padding: 5px 7px 4px;
+    background: var(--negro);
+    color: var(--blanco);
+    font-size: 0.625rem;
+  }
+  .tarjeta__info {
+    display: grid;
+    gap: 6px;
+    padding-top: 12px;
+    flex: 1;
+    align-content: start;
+  }
+  .tarjeta__nombre {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  /* Recorte a 2 líneas en un hijo sin relleno (el padding no deja asomar la 3.ª). */
+  .tarjeta__nombre span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .tarjeta__nombre a {
+    display: block;
+  }
+  .tarjeta__nombre a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .tarjeta__datos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px 10px;
+  }
+  .tarjeta__ref {
+    color: var(--gris-c);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+  }
+  .tarjeta__precio {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .tarjeta__nota {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: var(--gris-c);
+  }
+  .tarjeta__pedir {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    margin-top: 12px;
+    background: var(--negro);
+    color: var(--blanco);
+    border: 1.5px solid var(--negro);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition:
+      background-color 0.25s,
+      color 0.25s;
+  }
+  @media (hover: hover) {
+    .tarjeta__pedir:hover {
+      background: transparent;
+      color: var(--negro);
+    }
+  }
+
+  .cat__vacio {
+    padding: 48px 0;
+    color: var(--gris-c);
+  }
+  .cat__mas {
+    display: flex;
+    justify-content: center;
+    margin-top: clamp(40px, 6vw, 64px);
+  }
+  :global(html:not(.js)) .cat__mas {
+    display: none;
+  }
+
+  /* ---------- Ficha ---------- */
+  .ficha {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--blanco);
+    color: var(--negro);
+    overscroll-behavior: contain;
+  }
+  .ficha::backdrop {
+    background: rgb(10 10 10 / 0.72);
+  }
+  .ficha[open] {
+    animation: ficha-entra 0.5s var(--ease) both;
+  }
+  .ficha[open]::backdrop {
+    animation: velo 0.4s ease both;
+  }
+  .ficha.is-sale {
+    animation: ficha-sale 0.3s var(--ease-io) both;
+  }
+  @keyframes ficha-entra {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 24px, 0);
+    }
+  }
+  @keyframes ficha-sale {
+    to {
+      opacity: 0;
+      transform: translate3d(0, 16px, 0);
+    }
+  }
+  @keyframes velo {
+    from {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ficha[open],
+    .ficha.is-sale,
+    .ficha[open]::backdrop {
+      animation: none;
+    }
+  }
+  .ficha__caja {
+    position: relative;
+    min-height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+  .ficha__cerrar {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    right: 10px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    background: var(--negro);
+    color: var(--blanco);
+  }
+  .ficha__galeria {
+    position: relative;
+    background: var(--blanco-2);
+  }
+  .ficha__fotos {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    height: min(78svh, 133vw);
+    outline: none;
+  }
+  .ficha__fotos::-webkit-scrollbar {
+    display: none;
+  }
+  .ficha__fotos :global(picture) {
+    flex: 0 0 100%;
+    height: 100%;
+    scroll-snap-align: center;
+    background: var(--bg);
+  }
+  .ficha__fotos :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .ficha__nav {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+    background: var(--blanco);
+    color: var(--negro);
+    border: 1px solid var(--negro);
+    transition: opacity 0.2s;
+  }
+  .ficha__nav:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .ficha__nav--izq {
+    left: 10px;
+  }
+  .ficha__nav--der {
+    right: 10px;
+  }
+  .ficha__contador {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    padding: 6px 8px 5px;
+    background: var(--negro);
+    color: var(--blanco);
+    font-size: 0.6875rem;
+  }
+  .ficha__info {
+    display: grid;
+    align-content: start;
+    gap: 18px;
+    padding: 24px var(--gutter) calc(32px + env(safe-area-inset-bottom));
+  }
+  .ficha__cat {
+    color: var(--gris-c);
+  }
+  .ficha__nombre {
+    font-size: clamp(1.6rem, 6.4vw, 2.6rem);
+    line-height: 1;
+    margin-top: -6px;
+  }
+  .ficha__datos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 0;
+    border-block: 1px solid var(--negro);
+  }
+  .ficha__datos div {
+    padding: 14px 0;
+  }
+  .ficha__datos div + div {
+    padding-left: 16px;
+    border-left: 1px solid var(--linea-c);
+  }
+  .ficha__datos dt {
+    color: var(--gris-c);
+    font-size: 0.6875rem;
+    margin-bottom: 4px;
+  }
+  .ficha__datos dd {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+  .ficha__disp {
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+  .ficha__desc,
+  .ficha__nota {
+    color: var(--gris-c);
+    font-size: 0.9375rem;
+  }
+  .ficha__acciones {
+    display: grid;
+    gap: 10px;
+  }
+
+  @media (min-width: 900px) {
+    .ficha {
+      width: min(1120px, calc(100vw - 64px));
+      /* Un dialog modal tiene inset 0: con height:auto se estira a todo el alto. */
+      height: fit-content;
+      max-height: calc(100svh - 64px);
+      margin: auto;
+    }
+    .ficha__caja {
+      min-height: 0;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      grid-template-rows: none;
+    }
+    .ficha__cerrar {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    .ficha__fotos {
+      height: min(760px, calc(100svh - 64px));
+    }
+    .ficha__info {
+      padding: 64px 48px 48px;
+      align-content: center;
+    }
+  }
+</style>

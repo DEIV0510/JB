@@ -1,0 +1,105 @@
+---
+import '../styles/fuentes.css';
+import '../styles/global.css';
+import fuentes from '../data/fuentes.json';
+import marca from '../data/marca.json';
+import Carga from '../components/Carga.astro';
+import Cabecera from '../components/Cabecera.astro';
+import Pie from '../components/Pie.astro';
+import WhatsAppFlotante from '../components/WhatsAppFlotante.astro';
+import { REDES, WHATSAPP } from '../lib/contacto';
+
+interface Props {
+  titulo: string;
+  descripcion: string;
+  intro?: boolean;
+  // Foto del LCP para precargar (srcset AVIF) y tarjeta para redes.
+  precarga?: { srcset: string; sizes: string };
+  og?: string;
+  jsonld?: object[];
+  noindex?: boolean;
+  // Prefijo de los enlaces a secciones: '' en la portada, '/' en otras páginas.
+  base?: string;
+}
+const { titulo, descripcion, intro = false, precarga, og = '/og.jpg', jsonld = [], noindex = false, base = '' } = Astro.props;
+const site = Astro.site;
+const canonical = site ? new URL(Astro.url.pathname, site).href : undefined;
+const ogAbs = site ? new URL(og, site).href : undefined;
+
+const org = {
+  '@context': 'https://schema.org',
+  '@type': 'ClothingStore',
+  name: 'JB Merch',
+  ...(site ? { url: site.href, logo: new URL(marca.iconos.i512, site).href, image: ogAbs } : {}),
+  telephone: WHATSAPP.internacional,
+  sameAs: REDES.map((r) => r.url),
+};
+---
+
+<!doctype html>
+<html lang="es-CO">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{titulo}</title>
+    <meta name="description" content={descripcion} />
+    {canonical && !noindex && <link rel="canonical" href={canonical} />}
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <script is:inline define:vars={{ intro }}>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        if (!intro) return;
+        try {
+          var c = navigator.connection || {};
+          var lenta = c.saveData || /(^|-)(2g|3g)$/.test(c.effectiveType || '');
+          var reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (!lenta && !reducido && !location.hash && !sessionStorage.getItem('jb-intro')) {
+            d.classList.add('con-intro');
+            sessionStorage.setItem('jb-intro', '1');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <link rel="preload" href={fuentes.archivo} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fuentes.inter} as="font" type="font/woff2" crossorigin />
+    {precarga && <link rel="preload" as="image" type="image/avif" imagesrcset={precarga.srcset} imagesizes={precarga.sizes} fetchpriority="high" />}
+
+    <link rel="icon" href={marca.iconos.i32} type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href={marca.iconos.i180} />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="JB Merch" />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {ogAbs && <meta property="og:image" content={ogAbs} />}
+    {ogAbs && <meta property="og:image:width" content="1200" />}
+    {ogAbs && <meta property="og:image:height" content="630" />}
+    {ogAbs && <meta property="og:image:alt" content="JB Merch — Tu estilo. Tus reglas." />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(org)} />
+    {jsonld.map((j) => <script type="application/ld+json" set:html={JSON.stringify(j)} />)}
+  </head>
+  <body>
+    <a class="salto" href="#contenido">Saltar al contenido</a>
+    {intro && <Carga />}
+    <Cabecera base={base} />
+    <main id="contenido">
+      <slot />
+    </main>
+    <Pie base={base} />
+    <WhatsAppFlotante />
+    <script>
+      import '../scripts/app.ts';
+    </script>
+  </body>
+</html>

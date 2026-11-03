@@ -1,0 +1,42 @@
+[
+  {
+    "id": "camisetas",
+    "nombre": "Camisetas"
+  },
+  {
+    "id": "jeans",
+    "nombre": "Jeans"
+  },
+  {
+    "id": "bermudas",
+    "nombre": "Bermudas"
+  },
+  {
+    "id": "faldas-shorts",
+    "nombre": "Faldas y shorts"
+  },
+  {
+    "id": "pantalones",
+    "nombre": "Pantalones"
+  },
+  {
+    "id": "pantalonetas",
+    "nombre": "Pantalonetas"
+  },
+  {
+    "id": "blusas",
+    "nombre": "Blusas"
+  },
+  {
+    "id": "esqueletos",
+    "nombre": "Esqueletos"
+  },
+  {
+    "id": "conjuntos",
+    "nombre": "Conjuntos"
+  },
+  {
+    "id": "camisas",
+    "nombre": "Camisas"
+  }
+]
